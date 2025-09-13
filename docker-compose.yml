@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    environment:
+      # Переменные окружения с возможностью переопределения
+      - NODE_ENV=${NODE_ENV:-development}
+      - PORT=${PORT:-3000}
+      - HTTPS=${HTTPS:-false}
+      
+      # API ключи
+      - REACT_APP_GEMINI_API_KEY=${REACT_APP_GEMINI_API_KEY}
+      - REACT_APP_COMPOSIO_API_KEY=${REACT_APP_COMPOSIO_API_KEY}
+      
+      # Настройки приложения
+      - REACT_APP_API_URL=${REACT_APP_API_URL:-http://localhost:3000}
+      - REACT_APP_WS_URL=${REACT_APP_WS_URL:-ws://localhost:3000}
+      
+      # Настройки для разработки
+      - WATCHPACK_POLLING=${WATCHPACK_POLLING:-false}
+      - FAST_REFRESH=${FAST_REFRESH:-true}
+    
+    volumes:
+      # Монтируем код для разработки (можно отключить в продакшене)
+      - ./src:/app/src:ro
+      - ./public:/app/public:ro
+      
+      # Исключаем node_modules из хоста
+      - /app/node_modules
+    
+    # Перезапуск при падении
+    restart: unless-stopped
+    
+    # Healthcheck
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    
+    # Загружаем переменные из .env файла
+    env_file:
+      - .env

@@ -1,15 +1,18 @@
 import { ComposioToolSet } from "composio-core";
 import { toast } from "react-tiny-toast";
 
-const toolset = new ComposioToolSet({
-  apiKey: process.env.REACT_APP_COMPOSIO_API_KEY!,
-});
+let toolset: ComposioToolSet;
 
 export async function connectToApp(
   appName: string,
   userId: string = "default"
 ): Promise<boolean> {
   try {
+    if (!toolset) {
+      toolset = new ComposioToolSet({
+        apiKey: process.env.REACT_APP_COMPOSIO_API_KEY!,
+      });
+    }
     const entity = await toolset.getEntity(userId);
 
     // Check if already connected
